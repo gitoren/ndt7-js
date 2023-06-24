@@ -3,8 +3,6 @@
 
 <head>
     <script src="src/ndt7.min.js" type="text/javascript"></script>
-        <script src="src/aws-sk-js/aws-sdk-2.1401.0.min.js"></script>
-
 </head>
 
 <body>
@@ -12,20 +10,4 @@
     <div id="download"></div>
     <div id="upload"></div>
     <script src="src/ndtclient.js" type="text/javascript"></script>
-    <script>
-    
-AWS.config.update({region:'us-east-1' });
-
-(async () => {
-  const client = new DynamoDB();
-  
-  const command = new ListTablesCommand({});
-  try {
-    const results = await client.send(command);
-    console.log(results.TableNames.join("\n"));
-  } catch (err) {
-    console.error(err);
-  }
-})();
-    </script>
 </html>

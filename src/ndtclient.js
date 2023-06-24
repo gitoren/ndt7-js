@@ -1,4 +1,7 @@
-       ndt7.test(
+
+async function run_speedtest() {
+    var results = {};
+    var x = ndt7.test(
             {
                 userAcceptedDataPolicy: true,
                 downloadworkerfile: "src/ndt7-download-worker.js",
@@ -13,6 +16,9 @@
                         machine: server.machine,
                         locations: server.location,
                     });
+		    results['server'] = server.machine;
+		    results['location'] = server.location.city;
+		    results['country'] = server.location.country;
                     document.getElementById('server').innerHTML = 'Testing to: ' + server.machine + ' (' + server.location.city + ')';
                 },
                 downloadMeasurement: function (data) {
@@ -24,6 +30,12 @@
                     // (bytes/second) * (bits/byte) / (megabits/bit) = Mbps
                     const serverBw = data.LastServerMeasurement.BBRInfo.BW * 8 / 1000000;
                     const clientGoodput = data.LastClientMeasurement.MeanClientMbps;
+
+		    results['dl_elpased_time'] = data.LastClientMeasurement.ElapsedTime;
+		    results['dl_client_mbps'] = data.LastClientMeasurement.MeanClientMbps;
+    		    results['dl_num_bytes'] = data.LastClientMeasurement.NumBytes;
+		    results['dl_server_bw'] = serverBw;
+		    
                     console.log(
                         `Download test is complete:
     Instantaneous server bottleneck bandwidth estimate: ${serverBw} Mbps
@@ -41,7 +53,12 @@
                     const elapsed = data.LastServerMeasurement.TCPInfo.ElapsedTime;
                     // bytes * bits/byte / microseconds = Mbps
                     const throughput =
-                    bytesReceived * 8 / elapsed;
+			  bytesReceived * 8 / elapsed;
+		    
+		    results['ul_bytes_received'] =  data.LastServerMeasurement.TCPInfo.BytesReceived;
+		    results['ul_elapsed_time'] =  data.LastServerMeasurement.TCPInfo.ElapsedTime;
+		    results['ul_througput']=  throughput;
+
                     console.log(
                         `Upload test completed in ${(elapsed / 1000000).toFixed(2)}s
         Mean server throughput: ${throughput} Mbps`);
@@ -50,6 +67,14 @@
                     console.log('Error while running the test:', err.message);
                 },
             },
-        ).then((exitcode) => {
-            console.log("ndt7 test completed with exit code:", exitcode)
-        });
+       ).then((exitcode) => {
+            console.log("ndt7 test completed with exit code:", exitcode);
+       });
+    return results;
+}
+
+run_speedtest()
+    .then((data) => console.log('Final Answer: ', data));      
+
+
+
